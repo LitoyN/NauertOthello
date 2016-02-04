@@ -29,9 +29,10 @@ public class NauertOthelloProject {
         else
             currentPlayer = OPPONENT;
         
-        while(!gameOver){
+        //while(!gameOver){
             
-        }
+        //}
+        System.out.print(gameBoard.toString());
     }
     
     private static String getColor(){

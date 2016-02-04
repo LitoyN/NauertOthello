@@ -64,4 +64,16 @@ public class Board {
         
     }
     
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder("[");
+        for(int i = 0; i < 100; i++){
+            sb.append(boardArray[i] + "\t");
+            if((i-9)%10==0 && i !=0){
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
 }
