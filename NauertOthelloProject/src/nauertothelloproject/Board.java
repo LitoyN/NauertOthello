@@ -50,6 +50,7 @@ public class Board {
     
     public void getMoves(int player){
         
+        
     }
     
     public void applyMove(int player, int move){
@@ -67,10 +68,28 @@ public class Board {
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder("[");
+        for(int i = 0; i< 10; i++){
+            if(i==0)
+                sb.append("\t\t");
+            else if(i==9)
+                sb.append("\t\n");
+            else
+                sb.append(NauertOthelloProject.COLUMNS[i-1] + "\t");
+        }
+        sb.append("\t");
+        int row = 1;
         for(int i = 0; i < 100; i++){
             sb.append(boardArray[i] + "\t");
             if((i-9)%10==0 && i !=0){
                 sb.append("\n");
+                if(row<9){
+                    sb.append("R" +row +"\t");
+                    row++;
+                }
+                else{
+                    sb.append("\t");
+                }
+                
             }
         }
 
