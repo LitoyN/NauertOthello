@@ -38,6 +38,9 @@ public class NauertOthelloProject {
         //while(!gameBoard.gameOver){
             
         //}
+        System.out.print(gameBoard.toString());
+        gameBoard.takeTurn(ME);
+        System.out.print(gameBoard.toString());
         getMoveUI(keyboard);
         System.out.print(gameBoard.toString());
     }
