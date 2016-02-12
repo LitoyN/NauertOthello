@@ -66,12 +66,24 @@ public class Board {
         }
     }
     
-    public void takeTurn(int player){
+    public void myTurn(int player){
         scanBoardForMoves(player);
         thisMove = chooseMove(player);
         turnMovesList.clear();
         numPossibleMoves = 0;
         applyMove(thisMove, player);
+    }
+    
+    public void opponentTurn(int move, int player){
+        scanBoardForMoves(player);
+        if(turnMovesList.contains(move)){
+            applyMove(move, player);
+        }
+        else{
+            System.out.println("INVALID MOVE: " + move);
+        }
+        turnMovesList.clear();
+        numPossibleMoves = 0;
     }
     
     /**
@@ -141,11 +153,12 @@ public class Board {
     }
     
     public void applyMove(int move, int player){
+        System.out.println("Move Chosen: " + move);
         boardArray[move] = player;
-        flipEachDirection(player, move);
+        flipEachDirection(move, player);
     }
     
-    private void flipEachDirection(int player, int move){
+    private void flipEachDirection(int move, int player){
         int newLocation;
         int direction;
         
@@ -153,7 +166,7 @@ public class Board {
             direction = NauertOthelloProject.DIRECTIONS[i];
             newLocation = move + direction;
             if(boardArray[newLocation] == player * -1){
-                boardArray[newLocation] = flipOneDirection(direction, newLocation, player);
+                flipOneDirection(direction, newLocation, player);
             }
         }
         
@@ -164,10 +177,12 @@ public class Board {
         if(boardArray[boardLocation] == player * -1){
             flipValue = flipOneDirection(direction, boardLocation + direction, player);
         }
-        else if(boardArray[boardLocation] == NauertOthelloProject.BORDER){
+        else if(boardArray[boardLocation] == NauertOthelloProject.BORDER ||
+                boardArray[boardLocation] == NauertOthelloProject.EMPTY){
             flipValue = player * -1;
             return flipValue;
         }
+
         else{
             flipValue = boardArray[boardLocation];
         }
@@ -199,7 +214,7 @@ public class Board {
         for(int i = 0; i < 100; i++){
             sb.append(boardArray[i] + "\t");
             if((i-9)%10==0 && i !=0){
-                sb.append("\n");
+                sb.append("\n\n");
                 if(row<9){
                     sb.append("R" +row +"\t");
                     row++;
@@ -210,6 +225,7 @@ public class Board {
                 
             }
         }
+        sb.append("\n");
 
         return sb.toString();
     }

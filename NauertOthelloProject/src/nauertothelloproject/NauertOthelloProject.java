@@ -25,6 +25,7 @@ public class NauertOthelloProject {
     public static void main(String[] args) {
         Scanner keyboard = new Scanner(System.in);
         int currentPlayer = 1;
+        int thisMove;
         //boolean gameOver = false;
         
         myColor = getColor();
@@ -39,10 +40,14 @@ public class NauertOthelloProject {
             
         //}
         System.out.print(gameBoard.toString());
-        gameBoard.takeTurn(ME);
-        System.out.print(gameBoard.toString());
-        getMoveUI(keyboard);
-        System.out.print(gameBoard.toString());
+
+        for(int i = 0; i < 5; i++){
+            gameBoard.myTurn(ME);
+            System.out.print(gameBoard.toString());
+            thisMove = getMoveUI(keyboard);
+            gameBoard.opponentTurn(thisMove, OPPONENT);
+            System.out.print(gameBoard.toString());
+        }
     }
     
     private static String getColor(){
@@ -50,8 +55,8 @@ public class NauertOthelloProject {
         return myColor;
     }
     
+    
     private static int getMoveUI(Scanner input){
-        int moveInt = 0;
         int columnInt;
         int rowInt;
         int arrayPosition;
@@ -66,7 +71,7 @@ public class NauertOthelloProject {
         System.out.println("Column: " + columnInt);
         System.out.println("Array Position: " + arrayPosition);
         
-        return moveInt;  
+        return arrayPosition;  
     }
     
 }
