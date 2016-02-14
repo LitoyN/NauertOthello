@@ -31,28 +31,41 @@ public class NauertOthelloProject {
         myColor = getColor();
         gameBoard = new Board("b");
         
-        if(myColor == "b")
+        if(myColor.equalsIgnoreCase("b")){
             currentPlayer = ME;
-        else
+        }
+        else{
             currentPlayer = OPPONENT;
+        }
         
         //while(!gameBoard.gameOver){
             
         //}
+        System.out.println("First Player: " + currentPlayer);
         System.out.print(gameBoard.toString());
 
-        for(int i = 0; i < 5; i++){
-            gameBoard.myTurn(ME);
-            System.out.print(gameBoard.toString());
-            thisMove = getMoveUI(keyboard);
-            gameBoard.opponentTurn(thisMove, OPPONENT);
-            System.out.print(gameBoard.toString());
+        while(!gameBoard.gameOver){
+            boolean validMoveTaken;
+            if(currentPlayer == ME){
+                validMoveTaken = gameBoard.myTurn(ME);
+            }
+            else{
+                thisMove = getMoveUI(keyboard);
+                validMoveTaken = gameBoard.opponentTurn(thisMove, OPPONENT);
+            }
+            if(validMoveTaken){
+                currentPlayer = currentPlayer * -1;
+                System.out.print(gameBoard.toString());
+            }
+            gameBoard.isGameOver();
+
         }
+        System.out.println("GAME OVER");
     }
     
     private static String getColor(){
         String mycolor = "b";
-        return myColor;
+        return mycolor;
     }
     
     
@@ -63,6 +76,9 @@ public class NauertOthelloProject {
         String moveString;
         System.out.print("Please enter move: ");
         moveString = input.next().toUpperCase();
+        if(moveString.equalsIgnoreCase("-1")){
+            return -1;
+        }
         columnInt = Character.getNumericValue(moveString.charAt(0)) - 9;
         rowInt = Integer.parseInt(moveString.substring(1));
         arrayPosition = 10*rowInt + columnInt;

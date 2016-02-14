@@ -25,7 +25,7 @@ public class Board {
     
     int myScore;
     int oppScore;
-    int noMovesCount;
+    int passCount;
     boolean gameOver;
    
     
@@ -34,11 +34,11 @@ public class Board {
         turnMovesList = new ArrayList();
         
         thisMove = -1;
-        numPossibleMoves =0;
+        numPossibleMoves = 0;
         myScore = 2;
         oppScore = 2;
+        passCount = 0;
         gameOver = false;
-        noMovesCount = 0;
         buildBoard(myColor);
         
     }
@@ -66,24 +66,44 @@ public class Board {
         }
     }
     
-    public void myTurn(int player){
+    public boolean myTurn(int player){
+        System.out.println("MY TURN");
+        boolean validMove = true;
         scanBoardForMoves(player);
         thisMove = chooseMove(player);
         turnMovesList.clear();
         numPossibleMoves = 0;
+        if(thisMove == NOMOVES){
+            passCount++;
+            System.out.println("PASS " + passCount);
+            return validMove;
+        }
+        passCount = 0;
         applyMove(thisMove, player);
+        return validMove;
     }
     
-    public void opponentTurn(int move, int player){
+    public boolean opponentTurn(int move, int player){
+        System.out.println("OPPONENT TURN");
+        boolean validMove;
         scanBoardForMoves(player);
-        if(turnMovesList.contains(move)){
+        if(move == NOMOVES){
+            passCount++;
+            System.out.println("PASS " + passCount);
+            validMove = true;
+        }
+        else if(turnMovesList.contains(move)){
+            passCount = 0;
             applyMove(move, player);
+            validMove = true;
         }
         else{
             System.out.println("INVALID MOVE: " + move);
+            validMove = false;
         }
         turnMovesList.clear();
         numPossibleMoves = 0;
+        return validMove;
     }
     
     /**
@@ -114,9 +134,14 @@ public class Board {
                 possibleMove = lookOneDirection(direction,newLocation,player);
                 if(possibleMove > 0){
                     turnMovesList.add(possibleMove);
+                    numPossibleMoves++;
                     System.out.println("Possible Move Added: " + possibleMove);
+                    System.out.println("Number of Possible Moves: " + numPossibleMoves);
                 }
             }
+        }
+        if(numPossibleMoves == 0){
+            turnMovesList.add(NOMOVES);
         }
     }
     
@@ -130,9 +155,7 @@ public class Board {
      */
     private int lookOneDirection(int direction, int boardLocation, int player){
         int newLocation;
-        //System.out.println("Looking one direction: " + direction);
         if(boardArray[boardLocation] == 0){
-            numPossibleMoves++;
             return boardLocation;
         }
         if(boardArray[boardLocation] == player * -1){
@@ -146,8 +169,13 @@ public class Board {
     }
     
     public int chooseMove(int player){
+        if(numPossibleMoves == 0){
+            return NOMOVES;
+        }
          ran = new Random();
          ranNum = ran.nextInt(numPossibleMoves);
+         System.out.println("Random Choice Int: " + ranNum);
+         System.out.println("Move: " + (int)turnMovesList.get(ranNum));
          return (int)turnMovesList.get(ranNum);
         
     }
@@ -191,6 +219,9 @@ public class Board {
     }
     
     public boolean isGameOver(){
+        if(passCount >=2){
+            gameOver = true;
+        }
         return gameOver;
     }
     
