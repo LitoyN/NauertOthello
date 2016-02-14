@@ -111,11 +111,14 @@ public class Board {
      * @param player 
      */
     private void scanBoardForMoves(int player){
-        for(int i = 0; i < 100; i++){
-            if(boardArray[i] == player){
-                lookEachDirection(i,player);
+        int boardLocation;
+        for(int i = 1; i < 9 ; i++)
+            for(int j = 1; j < 9; j++){
+                boardLocation = i * 10 + j;
+                if(boardArray[boardLocation] == player){
+                    lookEachDirection(boardLocation,player);
+                }
             }
-        }
     }
     
     /**
@@ -138,10 +141,10 @@ public class Board {
                     System.out.println("Possible Move Added: " + possibleMove);
                     System.out.println("Number of Possible Moves: " + numPossibleMoves);
                 }
+                else{
+                    System.out.println("NOMOVES not added to possible moves");
+                }
             }
-        }
-        if(numPossibleMoves == 0){
-            turnMovesList.add(NOMOVES);
         }
     }
     
@@ -200,22 +203,20 @@ public class Board {
         
     }
     
-    private int flipOneDirection(int direction, int boardLocation, int player){
-        int flipValue;
-        if(boardArray[boardLocation] == player * -1){
-            flipValue = flipOneDirection(direction, boardLocation + direction, player);
+    private boolean flipOneDirection(int direction, int boardLocation, int player){
+        boolean flipPiece = false;
+        int newLocation = boardLocation + direction;
+        if(boardArray[newLocation] == player * -1){
+            flipPiece = flipOneDirection(direction, boardLocation + direction, player);
         }
-        else if(boardArray[boardLocation] == NauertOthelloProject.BORDER ||
-                boardArray[boardLocation] == NauertOthelloProject.EMPTY){
-            flipValue = player * -1;
-            return flipValue;
+        else if(boardArray[newLocation] == player){
+            flipPiece = true;
         }
-
-        else{
-            flipValue = boardArray[boardLocation];
+        if(flipPiece){
+            boardArray[boardLocation] = player;
         }
-        boardArray[boardLocation] = flipValue;
-        return flipValue;
+        
+        return flipPiece;
     }
     
     public boolean isGameOver(){
