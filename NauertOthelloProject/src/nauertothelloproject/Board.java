@@ -13,9 +13,11 @@ import java.util.Random;
 public class Board {
     
     public static final int NOMOVES = -1;
+    public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
     int boardArray[];
     ArrayList turnMovesList;
+    ArrayList movesList;
     
     int thisMove;
     int numPossibleMoves;
@@ -67,15 +69,14 @@ public class Board {
     }
     
     public boolean myTurn(int player){
-        System.out.println("MY TURN");
+        System.out.println("C MY TURN");
         boolean validMove = true;
-        scanBoardForMoves(player);
         thisMove = chooseMove(player);
         turnMovesList.clear();
         numPossibleMoves = 0;
         if(thisMove == NOMOVES){
             passCount++;
-            System.out.println("PASS " + passCount);
+            System.out.println("C PASS " + passCount);
             return validMove;
         }
         passCount = 0;
@@ -84,12 +85,11 @@ public class Board {
     }
     
     public boolean opponentTurn(int move, int player){
-        System.out.println("OPPONENT TURN");
+        System.out.println("C OPPONENT TURN");
         boolean validMove;
-        scanBoardForMoves(player);
         if(move == NOMOVES){
             passCount++;
-            System.out.println("PASS " + passCount);
+            System.out.println("C PASS " + passCount);
             validMove = true;
         }
         else if(turnMovesList.contains(move)){
@@ -98,7 +98,7 @@ public class Board {
             validMove = true;
         }
         else{
-            System.out.println("INVALID MOVE: " + move);
+            System.out.println("C INVALID MOVE: " + move);
             validMove = false;
         }
         turnMovesList.clear();
@@ -110,7 +110,7 @@ public class Board {
      * 
      * @param player 
      */
-    private void scanBoardForMoves(int player){
+    public void scanBoardForMoves(int player){
         int boardLocation;
         for(int i = 1; i < 9 ; i++)
             for(int j = 1; j < 9; j++){
@@ -130,20 +130,23 @@ public class Board {
         int possibleMove;
         int newLocation;
         int direction;
+        Move thisMove;
         for(int i = 0; i < 8; i++){
             direction = NauertOthelloProject.DIRECTIONS[i];
             newLocation = boardLocation + direction;
             if(boardArray[newLocation] == player * -1){
                 possibleMove = lookOneDirection(direction,newLocation,player);
                 if(possibleMove > 0){
+                    thisMove = new Move(possibleMove);
+                    movesList.add(thisMove);
                     turnMovesList.add(possibleMove);
                     numPossibleMoves++;
-                    System.out.println("Possible Move Added: " + possibleMove);
-                    System.out.println("Number of Possible Moves: " + numPossibleMoves);
+                    //System.out.println("C Possible Move Added: " + possibleMove);
+                    //System.out.println("C Number of Possible Moves: " + numPossibleMoves);
                 }
-                else{
-                    System.out.println("NOMOVES not added to possible moves");
-                }
+                //else{
+                    //System.out.println("C NOMOVES not added to possible moves");
+                //}
             }
         }
     }
@@ -170,22 +173,32 @@ public class Board {
         }
         
     }
-    
+    private void outputMove(String move, int player){
+        System.out.println(player + move);
+        
+    }
     public int chooseMove(int player){
         if(numPossibleMoves == 0){
             return NOMOVES;
         }
          ran = new Random();
          ranNum = ran.nextInt(numPossibleMoves);
-         System.out.println("Random Choice Int: " + ranNum);
-         System.out.println("Move: " + (int)turnMovesList.get(ranNum));
+         //System.out.println("C Random Choice Int: " + ranNum);
+         //System.out.println("C Move: " + (int)turnMovesList.get(ranNum));
          return (int)turnMovesList.get(ranNum);
         
     }
     
     public void applyMove(int move, int player){
-        System.out.println("Move Chosen: " + move);
+        //System.out.println("C Move Chosen: " + moveToString(move));
+        System.out.println(moveToString(move, player));
         boardArray[move] = player;
+        if(player == NauertOthelloProject.ME){
+            myScore++;
+        }
+        else{
+            oppScore++;
+        }
         flipEachDirection(move, player);
     }
     
@@ -214,6 +227,14 @@ public class Board {
         }
         if(flipPiece){
             boardArray[boardLocation] = player;
+            if(player == NauertOthelloProject.ME){
+                myScore++;
+                oppScore--;
+            }
+            else{
+                oppScore++;
+                myScore--;
+            }
         }
         
         return flipPiece;
@@ -228,16 +249,31 @@ public class Board {
     
     public void getScore(){
         
+        System.out.println("C MY SCORE: " + myScore);
+        System.out.println("C OPPONENT SCORE: " + oppScore);
+        
+    }
+    
+    public String moveToString(int move, int player){
+        String moveOutput;
+        int row;
+        String column;
+        row = move/10;
+        column = COLUMNS[(move-1)%10];
+        
+        moveOutput = column + " " + row;
+        
+        return moveOutput;
     }
     
     @Override
     public String toString(){
-        StringBuilder sb = new StringBuilder("[");
+        StringBuilder sb = new StringBuilder("C ");
         for(int i = 0; i< 10; i++){
             if(i==0)
                 sb.append("\t\t");
             else if(i==9)
-                sb.append("\t\n");
+                sb.append("\t\nC ");
             else
                 sb.append(NauertOthelloProject.COLUMNS[i-1] + "\t");
         }
@@ -246,7 +282,7 @@ public class Board {
         for(int i = 0; i < 100; i++){
             sb.append(boardArray[i] + "\t");
             if((i-9)%10==0 && i !=0){
-                sb.append("\n\n");
+                sb.append("\nC \nC ");
                 if(row<9){
                     sb.append("R" +row +"\t");
                     row++;
@@ -257,7 +293,7 @@ public class Board {
                 
             }
         }
-        sb.append("\n");
+        sb.append("\nC ");
 
         return sb.toString();
     }
