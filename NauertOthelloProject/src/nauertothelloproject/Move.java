@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package nauertothelloproject;
 
-import static nauertothelloproject.NauertOthelloProject.COLUMNS;
+package nauertothelloproject;
 
 /**
  *
@@ -13,20 +7,39 @@ import static nauertothelloproject.NauertOthelloProject.COLUMNS;
  */
 public class Move {
     
+    public static final int ME = 1;
+    public static final int OPPONENT = -1;
+    public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
+
+    
     int moveInt;
     String moveString;
     double moveValue;
     
     public Move(String movestring){
-        moveInt = stringToMove(movestring);
-        moveString = movestring;
-        moveValue = 0;
+        if(movestring.equalsIgnoreCase("pass")){
+            moveInt = -1;
+            moveString = movestring;
+            moveValue = 0;
+        }
+        else{
+            moveInt = stringToMove(movestring);
+            moveString = movestring;
+            moveValue = 0;
+        }
     }
     
     public Move(int moveint){
-        moveInt = moveint;
-        moveString = moveToString(moveint);
-        moveValue = 0;
+        if(moveint <= 0){
+            moveInt = moveint;
+            moveString = "PASS";
+            moveValue = 0;
+        }
+        else{
+            moveInt = moveint;
+            moveString = moveToString(moveint);
+            moveValue = 0;
+        }
     }
     
     public Move(int moveint, String movestring){
@@ -35,6 +48,17 @@ public class Move {
         moveValue = 0;
     }
     
+    public int getMoveInt(){
+        return moveInt;
+    }
+    
+    public String getMoveString(){
+        return moveString;
+    }
+    
+    public double getMoveValue(){
+        return moveValue;
+    }
 
     
     public String moveToString(int move){
@@ -70,6 +94,18 @@ public class Move {
         moveInt = moveInt + columnInt;
         System.out.println("C move in int form: " + moveInt);
         return moveInt;
+    }
+    
+    @Override
+    public boolean equals(Object object){
+        boolean sameSame = false;
+
+        if (object != null && object instanceof Move)
+        {
+            sameSame = this.moveInt == ((Move) object).moveInt;
+        }
+
+        return sameSame;
     }
     
 }

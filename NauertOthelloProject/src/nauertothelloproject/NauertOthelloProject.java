@@ -13,6 +13,7 @@ public class NauertOthelloProject {
 
     public static final String BLACK = "b";
     public static final String WHITE = "w";
+    public static final String PASS = "pass";
     public static final int EMPTY = 0;
     public static final int ME = 1;
     public static final int OPPONENT = -1;
@@ -24,11 +25,12 @@ public class NauertOthelloProject {
     static Board gameBoard;
     static String myColor;
     static String oppColor;
+    static String inputString;
     
     public static void main(String[] args) {
         Scanner keyboard = new Scanner(System.in);
         int currentPlayer = 1;
-        int thisMove;
+        Move thisMove;
         //boolean gameOver = false;
         
         boolean colorInit = false;
@@ -37,12 +39,12 @@ public class NauertOthelloProject {
             if(myColor.equalsIgnoreCase(BLACK) ||
                     myColor.equalsIgnoreCase(WHITE)){
                 colorInit = true;
-                System.out.println("C Initialize self as " + myColor);
+                //System.out.println("C Initialize self as " + myColor);
                 System.out.println("R " + myColor);
             }
         }
 
-        gameBoard = new Board(BLACK);
+        gameBoard = new Board(myColor);
         
         if(myColor.equalsIgnoreCase(BLACK)){
             currentPlayer = ME;
@@ -56,7 +58,6 @@ public class NauertOthelloProject {
         System.out.print(gameBoard.toString());
 
         while(!gameBoard.gameOver){
-            String inputString = "";
             boolean validMoveTaken;
             gameBoard.scanBoardForMoves(currentPlayer);
             if(currentPlayer == ME){
@@ -68,12 +69,16 @@ public class NauertOthelloProject {
                 boolean validInput = false;
                 while(!validInput){
                     inputString = getInput(keyboard);
-                    if(!inputString.startsWith("e")){
+                    if(!inputString.startsWith("q")){
                         validInput = true;
                     }
                 }
-
-                thisMove = stringToMove(inputString);
+                if(inputString.equalsIgnoreCase(PASS)){
+                    thisMove = new Move(PASS);
+                }
+                else{
+                    thisMove = new Move(stringToMove(inputString));
+                }
                 validMoveTaken = gameBoard.opponentTurn(thisMove,OPPONENT);
             }
             if(validMoveTaken){
@@ -102,15 +107,15 @@ public class NauertOthelloProject {
                     oppColor = BLACK;
                     break;
                 default:
-                    System.out.println("C Error in initialization input.");
-                    oppColor = "e";
-                    mycolor = "e";
+                    //System.out.println("C Error in initialization input.");
+                    oppColor = "q";
+                    mycolor = "q";
                     break;
             }
         }
         else{
             System.out.println("C Error in initialization input.");
-            mycolor = "e";
+            mycolor = "q";
         }
 
         
@@ -125,66 +130,42 @@ public class NauertOthelloProject {
         int i = 0;
         while(!foundCol){
             if(COLUMNS[i].equalsIgnoreCase(column)){
-                System.out.println("C COLUMN: " + COLUMNS[i]);
+                //System.out.println("C COLUMN: " + COLUMNS[i]);
                 foundCol = true;
                 columnInt = i +1;
             }
             i++;
         }
         int row = Integer.parseInt(inputString.substring(2,3));
-        System.out.println("C ROW: " + row);
+        //System.out.println("C ROW: " + row);
         
         moveInt = 10 * row;
         moveInt = moveInt + columnInt;
-        System.out.println("C move in int form: " + moveInt);
+        //System.out.println("C move in int form: " + moveInt);
         return moveInt;
     }
     
     private static String getInput(Scanner input){
         String moveString = input.nextLine();
-        if(moveString.isEmpty()){
-            moveString = "e";
-            System.out.println("C Error in input");
+        //System.out.println("C moveString.length: " + moveString.length());
+        //System.out.println("C moveString: " + moveString);
+        //System.out.println("C firstChar: " + firstChar);
+        
+        String firstChar = moveString.substring(0,1).toLowerCase();
+        if(moveString.length() <= 2){
+            return PASS;
+        }
+        else if(firstChar.equalsIgnoreCase(oppColor)){
+            return moveString.substring(2);
         }
         else{
-            System.out.println("C moveString: " + moveString);
-            String firstChar = moveString.substring(0,1).toLowerCase();
-            System.out.println("C firstChar: " + firstChar);
-            if(firstChar.equalsIgnoreCase(oppColor)){
-                return moveString.substring(2);
-            }
-            else{
-                moveString = "e";
-                System.out.println("C Error in input");
-            }
+            moveString = "q";
+            System.out.println("C Error in input");
         }
 
 
         
         return moveString;
-    }
-    
-    
-    
-    private static int getMoveUI(Scanner input){
-        int columnInt;
-        int rowInt;
-        int arrayPosition;
-        String moveString;
-        System.out.print("C Please enter move: ");
-        moveString = input.next().toUpperCase();
-        if(moveString.equalsIgnoreCase("-1")){
-            return -1;
-        }
-        columnInt = Character.getNumericValue(moveString.charAt(0)) - 9;
-        rowInt = Integer.parseInt(moveString.substring(1));
-        arrayPosition = 10*rowInt + columnInt;
-        //System.out.println("C Input string: " + moveString);
-        //System.out.println("C Row: " + rowInt);
-        //System.out.println("C Column: " + columnInt);
-        System.out.println("C Array Position: " + arrayPosition);
-        
-        return arrayPosition;  
     }
     
 }

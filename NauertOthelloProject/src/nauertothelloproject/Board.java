@@ -6,37 +6,51 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+
 /**
  *
  * @author elliot
  */
 public class Board {
     
+    public static final int EMPTY = 0;
+    public static final int ME = 1;
+    public static final int OPPONENT = -1;
+    public static final int BORDER = -2;
+    public static final int[] DIRECTIONS = {-11,-10,-9,-1,1,9,10,11};
+    public static final int NUMDIRECTIONS = 8;
     public static final int NOMOVES = -1;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
     int boardArray[];
-    ArrayList turnMovesList;
-    ArrayList movesList;
+    ArrayList<Move> movesList;
     
-    int thisMove;
+    Move thisMove;
     int numPossibleMoves;
     
     Random ran;
     int ranNum;
     
+    String myColor;
+    String oppColor;
     int myScore;
     int oppScore;
     int passCount;
     boolean gameOver;
    
     
-    public Board(String myColor){
+    public Board(String mycolor){
         boardArray = new int[100];
-        turnMovesList = new ArrayList();
-        
-        thisMove = -1;
+        movesList = new ArrayList<Move>();
+
+        thisMove = new Move(NOMOVES);
         numPossibleMoves = 0;
+        
+        myColor = mycolor;
+        oppColor = "b";
+        if(mycolor.equalsIgnoreCase("b")){
+            oppColor = "w";
+        }
         myScore = 2;
         oppScore = 2;
         passCount = 0;
@@ -72,11 +86,12 @@ public class Board {
         System.out.println("C MY TURN");
         boolean validMove = true;
         thisMove = chooseMove(player);
-        turnMovesList.clear();
+        movesList.clear();
         numPossibleMoves = 0;
-        if(thisMove == NOMOVES){
+        if(thisMove.getMoveInt() == NOMOVES){
             passCount++;
             System.out.println("C PASS " + passCount);
+            System.out.println(myColor);
             return validMove;
         }
         passCount = 0;
@@ -84,24 +99,27 @@ public class Board {
         return validMove;
     }
     
-    public boolean opponentTurn(int move, int player){
+    public boolean opponentTurn(Move move, int player){
         System.out.println("C OPPONENT TURN");
         boolean validMove;
-        if(move == NOMOVES){
+        scanBoardForMoves(player);
+        System.out.println("C numPossibleMoves: " + numPossibleMoves);
+        if(move.getMoveInt() == NOMOVES){
             passCount++;
             System.out.println("C PASS " + passCount);
+            System.out.println(oppColor);
             validMove = true;
         }
-        else if(turnMovesList.contains(move)){
+        else if(movesList.contains(move)){
             passCount = 0;
             applyMove(move, player);
             validMove = true;
         }
         else{
-            System.out.println("C INVALID MOVE: " + move);
+            System.out.println("C INVALID MOVE: " + move.getMoveString());
             validMove = false;
         }
-        turnMovesList.clear();
+        movesList.clear();
         numPossibleMoves = 0;
         return validMove;
     }
@@ -139,7 +157,7 @@ public class Board {
                 if(possibleMove > 0){
                     thisMove = new Move(possibleMove);
                     movesList.add(thisMove);
-                    turnMovesList.add(possibleMove);
+                    //movesList.add(possibleMove);
                     numPossibleMoves++;
                     //System.out.println("C Possible Move Added: " + possibleMove);
                     //System.out.println("C Number of Possible Moves: " + numPossibleMoves);
@@ -173,33 +191,35 @@ public class Board {
         }
         
     }
-    private void outputMove(String move, int player){
-        System.out.println(player + move);
-        
-    }
-    public int chooseMove(int player){
+
+    public Move chooseMove(int player){
         if(numPossibleMoves == 0){
-            return NOMOVES;
+            return new Move(NOMOVES);
         }
          ran = new Random();
          ranNum = ran.nextInt(numPossibleMoves);
          //System.out.println("C Random Choice Int: " + ranNum);
          //System.out.println("C Move: " + (int)turnMovesList.get(ranNum));
-         return (int)turnMovesList.get(ranNum);
+         return (Move)movesList.get(ranNum);
         
     }
     
-    public void applyMove(int move, int player){
+    public void applyMove(Move move, int player){
         //System.out.println("C Move Chosen: " + moveToString(move));
-        System.out.println(moveToString(move, player));
-        boardArray[move] = player;
+        if(player == ME){
+            System.out.println(myColor + " " + moveToString(move.getMoveInt(), player));
+        }
+        else{
+            System.out.println("C " + oppColor + " " + moveToString(move.getMoveInt(), player));
+        }
+        boardArray[move.getMoveInt()] = player;
         if(player == NauertOthelloProject.ME){
             myScore++;
         }
         else{
             oppScore++;
         }
-        flipEachDirection(move, player);
+        flipEachDirection(move.getMoveInt(), player);
     }
     
     private void flipEachDirection(int move, int player){
@@ -251,6 +271,12 @@ public class Board {
         
         System.out.println("C MY SCORE: " + myScore);
         System.out.println("C OPPONENT SCORE: " + oppScore);
+        if(myColor.equalsIgnoreCase("b")){
+            System.out.println(myScore);
+        }
+        else{
+            System.out.println(oppScore);
+        }
         
     }
     
