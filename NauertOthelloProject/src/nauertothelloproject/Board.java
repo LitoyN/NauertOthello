@@ -67,7 +67,7 @@ public class Board {
             boardArray[i*10] = NauertOthelloProject.BORDER;
             boardArray[i*10+9] = NauertOthelloProject.BORDER;
         }
-        if(myColor == "b"){
+        if(myColor.equalsIgnoreCase("b")){
             boardArray[45] = NauertOthelloProject.ME;
             boardArray[54] = NauertOthelloProject.ME;
             boardArray[44] = NauertOthelloProject.OPPONENT;
@@ -285,7 +285,7 @@ public class Board {
         int row;
         String column;
         row = move/10;
-        column = COLUMNS[(move-1)%10];
+        column = COLUMNS[(move-1)%10].toLowerCase();
         
         moveOutput = column + " " + row;
         
