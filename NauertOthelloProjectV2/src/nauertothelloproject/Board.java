@@ -101,8 +101,9 @@ public class Board {
             for(int j = 1; j < 9; j++){
                 boardLocation = i * 10 + j;
                 if(boardArray[boardLocation] == player){
+                    System.out.println("Found player: " + player + " at location: " + boardLocation);
                     for(int k = 0; k < 8; k++){
-                        direction = NauertOthelloProject.DIRECTIONS[i];
+                        direction = NauertOthelloProject.DIRECTIONS[k];
                         newLocation = boardLocation + direction;
                         if(boardArray[newLocation] == player * -1){
                             possibleMove = lookOneDirection(direction,newLocation,player);
