@@ -327,6 +327,34 @@ public class Board {
         
     }
     
+    public Move alphaBeta(Board currentboard, int ply, int player, double alpha, double beta, int maxDepth){
+        
+        if(ply >= maxDepth){
+            Move returnMove = new Move();
+            returnMove.setMoveValue(currentboard.evaluateBoard(player));
+            return returnMove;
+        }
+        
+        else{
+            
+        }
+        
+    }
+    
+    public double evaluateBoard(int player){
+        int countPieces = 0;
+        int boardLocation;
+        for(int i = 1; i < 9 ; i++){
+            for(int j = 1; j < 9; j++){
+                boardLocation = i * 10 + j;
+                if(boardArray[boardLocation] == player){
+                    countPieces++;
+                }
+            }
+        }
+        return countPieces;
+    }
+    
     public String moveToString(int move, int player){
         String moveOutput;
         int row;

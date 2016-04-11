@@ -48,6 +48,12 @@ public class Move {
         moveValue = 0;
     }
     
+    public Move(){
+        moveInt = 0;
+        moveString = "no";
+        moveValue = 0;
+    }
+    
     public int getMoveInt(){
         return moveInt;
     }
@@ -60,7 +66,7 @@ public class Move {
         return moveValue;
     }
     
-    public void setMoveValue(float value){
+    public void setMoveValue(double value){
         moveValue = value;
     }
 
