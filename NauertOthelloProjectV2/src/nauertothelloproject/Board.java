@@ -22,15 +22,13 @@ public class Board {
     public static final int NOMOVES = -1;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
-    int boardArray[];
+
     ArrayList<Move> movesList;
     
     Move thisMove;
     int numPossibleMoves;
     
-    Random ran;
-    int ranNum;
-    
+    int boardArray[];
     String myColor;
     String oppColor;
     int myScore;
@@ -57,6 +55,18 @@ public class Board {
         gameOver = false;
         buildBoard(myColor);
         
+    }
+    
+    public Board(Board oldBoard){
+        boardArray = oldBoard.boardArray;
+        movesList = oldBoard.movesList;
+        myColor = oldBoard.myColor;
+        oppColor = oldBoard.oppColor;
+        myScore = oldBoard.myScore;
+        oppScore = oldBoard.oppScore;
+        passCount = oldBoard.passCount;
+        gameOver = oldBoard.gameOver;
+        numPossibleMoves = oldBoard.numPossibleMoves;
     }
     
     private void buildBoard(String myColor){
@@ -101,7 +111,7 @@ public class Board {
             for(int j = 1; j < 9; j++){
                 boardLocation = i * 10 + j;
                 if(boardArray[boardLocation] == player){
-                    System.out.println("Found player: " + player + " at location: " + boardLocation);
+                    System.out.println("C Found player: " + player + " at location: " + boardLocation);
                     for(int k = 0; k < 8; k++){
                         direction = NauertOthelloProject.DIRECTIONS[k];
                         newLocation = boardLocation + direction;
@@ -204,14 +214,8 @@ public class Board {
                 if(possibleMove > 0){
                     thisMoveTemp = new Move(possibleMove);
                     movesList.add(thisMoveTemp);
-                    //movesList.add(possibleMove);
                     numPossibleMoves++;
-                    //System.out.println("C Possible Move Added: " + possibleMove);
-                    //System.out.println("C Number of Possible Moves: " + numPossibleMoves);
                 }
-                //else{
-                    //System.out.println("C NOMOVES not added to possible moves");
-                //}
             }
         }
     }
@@ -240,13 +244,14 @@ public class Board {
     }
 
     public Move chooseMove(int player){
+        Random ran;
+        int ranNum;
+        
         if(numPossibleMoves == 0){
             return new Move(NOMOVES);
         }
          ran = new Random();
          ranNum = ran.nextInt(numPossibleMoves);
-         //System.out.println("C Random Choice Int: " + ranNum);
-         //System.out.println("C Move: " + (int)turnMovesList.get(ranNum));
          return (Move)movesList.get(ranNum);
         
     }
@@ -336,7 +341,26 @@ public class Board {
         }
         
         else{
-            
+            Move bestMove;
+            ArrayList<Move> currentMoves = getMoves(player);
+            if(currentMoves.isEmpty()){
+                //as it is implemented right now, currentMoves can't be empty.
+                //instead, it might hold "passmove" which equals
+            }
+            bestMove = currentMoves.get(0);
+            for(Move move:currentMoves){
+                Board newBoard = new Board(currentboard);
+                newBoard.applyMove(move, player);
+                Move tempMove = alphaBeta(newBoard,ply+1,player*-1,beta*-1,alpha*-1,maxDepth);
+                if(tempMove.getMoveValue() > alpha){
+                    bestMove = tempMove;
+                    alpha = tempMove.moveValue;
+                    if(alpha > beta){
+                        return bestMove;
+                    }
+                }
+            }
+            return bestMove;
         }
         
     }

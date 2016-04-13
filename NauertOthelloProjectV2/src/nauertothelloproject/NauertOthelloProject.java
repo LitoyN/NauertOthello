@@ -54,16 +54,8 @@ public class NauertOthelloProject {
             currentPlayer = OPPONENT;
         }
         
-
-        //System.out.println("C First Player: " + currentPlayer);
         System.out.print(gameBoard.toString());
         
-        ArrayList<Move> tempMovesList = gameBoard.getMoves(ME);
-        System.out.println("local moves list size: " + tempMovesList.size());
-        System.out.print("local moves list: ");
-        gameBoard.printMoveList(tempMovesList);
-        System.out.print("global moves list: ");
-        gameBoard.printMoveList(gameBoard.movesList);
 
        
     }
