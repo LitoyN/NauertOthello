@@ -58,8 +58,8 @@ public class Board {
     }
     
     public Board(Board oldBoard){
-        boardArray = oldBoard.boardArray;
-        movesList = oldBoard.movesList;
+        boardArray = oldBoard.boardArray.clone();
+        movesList = new ArrayList<>(oldBoard.movesList);
         myColor = oldBoard.myColor;
         oppColor = oldBoard.oppColor;
         myScore = oldBoard.myScore;
@@ -94,7 +94,7 @@ public class Board {
     
     public void printMoveList(ArrayList<Move> moveList){
         for(Move moveList1 : moveList) {
-            System.out.print(moveList1.moveString + " ");
+            System.out.println("C " + moveList1.moveString + " ");
         }
         System.out.println();
     }
@@ -115,6 +115,7 @@ public class Board {
                     for(int k = 0; k < 8; k++){
                         direction = NauertOthelloProject.DIRECTIONS[k];
                         newLocation = boardLocation + direction;
+                        //System.out.println("C Checking location: " + newLocation);
                         if(boardArray[newLocation] == player * -1){
                             possibleMove = lookOneDirection(direction,newLocation,player);
                             if(possibleMove > 0){
@@ -123,8 +124,8 @@ public class Board {
                                 movesList.add(thisMoveTemp);
                                 //movesList.add(possibleMove);
                                 numPossibleMoves++;
-                                //System.out.println("C Possible Move Added: " + possibleMove);
-                                //System.out.println("C Number of Possible Moves: " + numPossibleMoves);
+                                System.out.println("C Possible Move Added: " + possibleMove);
+                                System.out.println("C Number of Possible Moves: " + numPossibleMoves);
                             }
                         //else{
                             //System.out.println("C NOMOVES not added to possible moves");
@@ -137,48 +138,7 @@ public class Board {
         
         return allMoves;
     }
-    
-    public boolean myTurn(int player){
-        System.out.println("C MY TURN");
-        boolean validMove = true;
-        thisMove = chooseMove(player);
-        movesList.clear();
-        numPossibleMoves = 0;
-        if(thisMove.getMoveInt() == NOMOVES){
-            passCount++;
-            System.out.println("C PASS " + passCount);
-            System.out.println(myColor);
-            return validMove;
-        }
-        passCount = 0;
-        applyMove(thisMove, player);
-        return validMove;
-    }
-    
-    public boolean opponentTurn(Move move, int player){
-        System.out.println("C OPPONENT TURN");
-        boolean validMove;
-        scanBoardForMoves(player);
-        System.out.println("C numPossibleMoves: " + numPossibleMoves);
-        if(move.getMoveInt() == NOMOVES){
-            passCount++;
-            System.out.println("C PASS " + passCount);
-            System.out.println(oppColor);
-            validMove = true;
-        }
-        else if(movesList.contains(move)){
-            passCount = 0;
-            applyMove(move, player);
-            validMove = true;
-        }
-        else{
-            System.out.println("C INVALID MOVE: " + move.getMoveString());
-            validMove = false;
-        }
-        movesList.clear();
-        numPossibleMoves = 0;
-        return validMove;
-    }
+        
     
     /**
      * 
@@ -259,9 +219,31 @@ public class Board {
     public void applyMove(Move move, int player){
         //System.out.println("C Move Chosen: " + moveToString(move));
         if(player == ME){
+            System.out.println("C Applying My Move: ");
             System.out.println(myColor + " " + moveToString(move.getMoveInt(), player));
         }
         else{
+            System.out.println("C Applying Opponent Move: ");
+            System.out.println("C " + oppColor + " " + moveToString(move.getMoveInt(), player));
+        }
+        boardArray[move.getMoveInt()] = player;
+        if(player == NauertOthelloProject.ME){
+            myScore++;
+        }
+        else{
+            oppScore++;
+        }
+        flipEachDirection(move.getMoveInt(), player);
+    }
+    
+    public void applyMoveAB(Move move, int player){
+        //System.out.println("C Move Chosen: " + moveToString(move));
+        if(player == ME){
+            System.out.println("C Applying My Move: ");
+            System.out.println("C " + myColor + " " + moveToString(move.getMoveInt(), player));
+        }
+        else{
+            System.out.println("C Applying Opponent Move: ");
             System.out.println("C " + oppColor + " " + moveToString(move.getMoveInt(), player));
         }
         boardArray[move.getMoveInt()] = player;
@@ -335,25 +317,36 @@ public class Board {
     public Move alphaBeta(Board currentboard, int ply, int player, double alpha, double beta, int maxDepth){
         
         if(ply >= maxDepth){
+            System.out.println("C Max Depth Reached: " + ply);
             Move returnMove = new Move();
             returnMove.setMoveValue(currentboard.evaluateBoard(player));
             return returnMove;
         }
         
         else{
+            System.out.println("C Current Ply: " + ply);
             Move bestMove;
-            ArrayList<Move> currentMoves = getMoves(player);
+            System.out.println("C Getting Moves for Player " + player);
+            ArrayList<Move> currentMoves = currentboard.getMoves(player);
+            int i = 0;
+            System.out.println("C moves list for player " + player + ": ");
+            printMoveList(currentMoves);
+
             if(currentMoves.isEmpty()){
                 //as it is implemented right now, currentMoves can't be empty.
                 //instead, it might hold "passmove" which equals
             }
             bestMove = currentMoves.get(0);
             for(Move move:currentMoves){
+                //System.out.println("Old Board Before Applying Move: ");
+                //System.out.println(currentboard.toString());
                 Board newBoard = new Board(currentboard);
-                newBoard.applyMove(move, player);
+                newBoard.applyMoveAB(move, player);
+                //System.out.println("New Board After Appling Move: " + move.getMoveString() + " for player " + player);
+                //System.out.println(newBoard.toString());
                 Move tempMove = alphaBeta(newBoard,ply+1,player*-1,beta*-1,alpha*-1,maxDepth);
                 if(tempMove.getMoveValue() > alpha){
-                    bestMove = tempMove;
+                    bestMove = move;
                     alpha = tempMove.moveValue;
                     if(alpha > beta){
                         return bestMove;
@@ -366,6 +359,9 @@ public class Board {
     }
     
     public double evaluateBoard(int player){
+        //********CHECK FOR END GAME*******************************************
+        //********IF WIN, MAKE VALUE VERY HIGH*********************************
+        //*********IF LOSS, MAKE VALUE LOW************************************
         int countPieces = 0;
         int boardLocation;
         for(int i = 1; i < 9 ; i++){
@@ -376,6 +372,35 @@ public class Board {
                 }
             }
         }
+        return countPieces;
+    }
+    
+    public double countBlackPieces(){
+        int countPieces = 0;
+        int boardLocation;
+        if(myColor == "BLACK"){
+            for(int i = 1; i < 9 ; i++){
+                for(int j = 1; j < 9; j++){
+                    boardLocation = i * 10 + j;
+                    if(boardArray[boardLocation] == ME){
+                        countPieces++;
+                    }
+
+                }
+            }
+        }
+        else{
+            for(int i = 1; i < 9 ; i++){
+                for(int j = 1; j < 9; j++){
+                    boardLocation = i * 10 + j;
+                    if(boardArray[boardLocation] == ME){
+                        countPieces++;
+                    }
+                }
+            }   
+        }
+        
+
         return countPieces;
     }
     

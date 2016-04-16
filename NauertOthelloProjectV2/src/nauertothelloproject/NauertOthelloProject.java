@@ -23,6 +23,8 @@ public class NauertOthelloProject {
     public static final int NUMDIRECTIONS = 8;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
+    public static final int MAXDEPTH = 8;
+    
     static Board gameBoard;
     static String myColor;
     static String oppColor;
@@ -32,16 +34,23 @@ public class NauertOthelloProject {
         Scanner keyboard = new Scanner(System.in);
         int currentPlayer = 1;
         Move thisMove;
-        //boolean gameOver = false;
         
+        //Listen for color assignment and intialize board***********************
         boolean colorInit = false;
         while(!colorInit){
             myColor = getColor(keyboard);
-            if(myColor.equalsIgnoreCase(BLACK) ||
-                    myColor.equalsIgnoreCase(WHITE)){
+            if(myColor.equalsIgnoreCase(BLACK)){
+                oppColor = WHITE;
                 colorInit = true;
-                //System.out.println("C Initialize self as " + myColor);
+                System.out.println("C Initialize self as " + myColor);
                 System.out.println("R " + myColor);
+
+            }
+            if(myColor.equalsIgnoreCase(WHITE)){
+                oppColor = BLACK;
+                colorInit = true;
+                System.out.println("C Initialize self as " + myColor);
+                System.out.println("R " + myColor);              
             }
         }
 
@@ -53,8 +62,69 @@ public class NauertOthelloProject {
         else{
             currentPlayer = OPPONENT;
         }
+        //board initialized*****************************************************
         
+        //print initial board
         System.out.print(gameBoard.toString());
+        
+        //while each player still has moves, alternate turns********************
+        while(!gameBoard.gameOver){
+            boolean validMoveTaken;
+            System.out.println("C Starting Player " + currentPlayer + "'s turn");
+            System.out.println("C ");
+            if(currentPlayer == ME){
+                System.out.println("C Compiling moves lists for both players to check end game");
+                ArrayList<Move> myMoves = gameBoard.getMoves(ME);
+                ArrayList<Move> oppMoves = gameBoard.getMoves(OPPONENT);
+                System.out.println("C done with initial move list check");
+                System.out.println("C ");
+                if(myMoves.isEmpty()){
+                    if(oppMoves.isEmpty()){
+                        gameBoard.gameOver = true;
+                        System.out.print(gameBoard.countBlackPieces());
+                    }
+                    else{
+                        System.out.print(myColor);
+                    }
+                }
+                else{
+                    double alpha = Double.MIN_VALUE;
+                    double beta = Double.MAX_VALUE;
+                    thisMove = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH);
+                    System.out.println("C New board before applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
+                    System.out.println(gameBoard.toString());
+                    gameBoard.applyMove(thisMove, ME);
+                    System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
+
+                }
+            }
+            else{
+                boolean validInput = false;
+                while(!validInput){
+                    System.out.println("Entered while loop");
+                    inputString = getInput(keyboard);
+                    System.out.println("InputString: " + inputString);
+                    if(inputString.startsWith(oppColor)){
+                        validInput = true;
+                    }
+                }
+                //NEED TO HANDLE PASSES BETTER.
+                if(inputString.equalsIgnoreCase(PASS)){
+                    thisMove = new Move(PASS);
+                }
+                else{
+                    inputString = inputString.substring(2);
+                    System.out.println("Move substring: " + inputString);
+                    thisMove = new Move(inputString);
+                    System.out.println("Move string after converting to Move object: " + thisMove.moveString);
+                    gameBoard.applyMove(thisMove, OPPONENT);
+                    System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
+
+                }
+            }
+            currentPlayer = currentPlayer*-1;
+            System.out.println(gameBoard.toString());
+        }
         
 
        
