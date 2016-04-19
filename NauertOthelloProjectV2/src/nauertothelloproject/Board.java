@@ -13,6 +13,8 @@ import java.util.Random;
  */
 public class Board {
     
+    public static final String BLACK = "b";
+    public static final String WHITE = "w";
     public static final int EMPTY = 0;
     public static final int ME = 1;
     public static final int OPPONENT = -1;
@@ -22,27 +24,21 @@ public class Board {
     public static final int NOMOVES = -1;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
-
-    ArrayList<Move> movesList;
     
     Move thisMove;
-    int numPossibleMoves;
     
     int boardArray[];
     String myColor;
     String oppColor;
     int myScore;
     int oppScore;
-    int passCount;
     boolean gameOver;
    
     
     public Board(String mycolor){
         boardArray = new int[100];
-        movesList = new ArrayList<>();
 
         thisMove = new Move(NOMOVES);
-        numPossibleMoves = 0;
         
         myColor = mycolor;
         oppColor = "b";
@@ -51,7 +47,6 @@ public class Board {
         }
         myScore = 2;
         oppScore = 2;
-        passCount = 0;
         gameOver = false;
         buildBoard(myColor);
         
@@ -59,14 +54,11 @@ public class Board {
     
     public Board(Board oldBoard){
         boardArray = oldBoard.boardArray.clone();
-        movesList = new ArrayList<>(oldBoard.movesList);
         myColor = oldBoard.myColor;
         oppColor = oldBoard.oppColor;
         myScore = oldBoard.myScore;
         oppScore = oldBoard.oppScore;
-        passCount = oldBoard.passCount;
         gameOver = oldBoard.gameOver;
-        numPossibleMoves = oldBoard.numPossibleMoves;
     }
     
     private void buildBoard(String myColor){
@@ -105,13 +97,14 @@ public class Board {
         int possibleMove;
         int newLocation;
         int direction;
+        int numPossibleMoves = 0;
         Move thisMoveTemp;
         
         for(int i = 1; i < 9 ; i++){
             for(int j = 1; j < 9; j++){
                 boardLocation = i * 10 + j;
                 if(boardArray[boardLocation] == player){
-                    System.out.println("C Found player: " + player + " at location: " + boardLocation);
+                    //System.out.println("C Found player: " + player + " at location: " + boardLocation);
                     for(int k = 0; k < 8; k++){
                         direction = NauertOthelloProject.DIRECTIONS[k];
                         newLocation = boardLocation + direction;
@@ -120,16 +113,13 @@ public class Board {
                             possibleMove = lookOneDirection(direction,newLocation,player);
                             if(possibleMove > 0){
                                 thisMoveTemp = new Move(possibleMove);
-                                allMoves.add(thisMoveTemp);
-                                movesList.add(thisMoveTemp);
-                                //movesList.add(possibleMove);
-                                numPossibleMoves++;
-                                System.out.println("C Possible Move Added: " + possibleMove);
-                                System.out.println("C Number of Possible Moves: " + numPossibleMoves);
+                                if(!allMoves.contains(thisMoveTemp)){
+                                    allMoves.add(thisMoveTemp);
+                                    numPossibleMoves++;
+                                    //System.out.println("C Possible Move Added: " + possibleMove);
+                                    //System.out.println("C Number of Possible Moves: " + numPossibleMoves);
+                                }
                             }
-                        //else{
-                            //System.out.println("C NOMOVES not added to possible moves");
-                        //}
                         }
                     }
                 }
@@ -142,46 +132,6 @@ public class Board {
     
     /**
      * 
-     * @param player 
-     */
-    public void scanBoardForMoves(int player){
-        int boardLocation;
-        for(int i = 1; i < 9 ; i++){
-            for(int j = 1; j < 9; j++){
-                boardLocation = i * 10 + j;
-                if(boardArray[boardLocation] == player){
-                    lookEachDirection(boardLocation,player);
-                }
-            }
-        }
-    }
-    
-    /**
-     * 
-     * @param boardLocation
-     * @param player 
-     */
-    private void lookEachDirection(int boardLocation, int player){
-        int possibleMove;
-        int newLocation;
-        int direction;
-        Move thisMoveTemp;
-        for(int i = 0; i < 8; i++){
-            direction = NauertOthelloProject.DIRECTIONS[i];
-            newLocation = boardLocation + direction;
-            if(boardArray[newLocation] == player * -1){
-                possibleMove = lookOneDirection(direction,newLocation,player);
-                if(possibleMove > 0){
-                    thisMoveTemp = new Move(possibleMove);
-                    movesList.add(thisMoveTemp);
-                    numPossibleMoves++;
-                }
-            }
-        }
-    }
-    
-    /**
-     * 
      * @param direction
      * @param boardLocation
      * @param player
@@ -190,41 +140,27 @@ public class Board {
      */
     private int lookOneDirection(int direction, int boardLocation, int player){
         int newLocation;
-        if(boardArray[boardLocation] == 0){
-            return boardLocation;
+        if(boardLocation > -1){
+            if(boardArray[boardLocation] == 0){
+                return boardLocation;
+            }
+            if(boardArray[boardLocation] == player * -1){
+                newLocation = boardLocation + direction;
+                return lookOneDirection(direction, newLocation, player);
+            }
         }
-        if(boardArray[boardLocation] == player * -1){
-            newLocation = boardLocation + direction;
-            return lookOneDirection(direction, newLocation, player);
-        }
-        else{
-            return NOMOVES;
-        }
-        
-    }
-
-    public Move chooseMove(int player){
-        Random ran;
-        int ranNum;
-        
-        if(numPossibleMoves == 0){
-            return new Move(NOMOVES);
-        }
-         ran = new Random();
-         ranNum = ran.nextInt(numPossibleMoves);
-         return (Move)movesList.get(ranNum);
-        
+        return NOMOVES;      
     }
     
     public void applyMove(Move move, int player){
-        //System.out.println("C Move Chosen: " + moveToString(move));
+
         if(player == ME){
             System.out.println("C Applying My Move: ");
-            System.out.println(myColor + " " + moveToString(move.getMoveInt(), player));
+            System.out.println(myColor + " " + move.moveString);
         }
         else{
             System.out.println("C Applying Opponent Move: ");
-            System.out.println("C " + oppColor + " " + moveToString(move.getMoveInt(), player));
+            System.out.println(oppColor + " " + move.moveString);
         }
         boardArray[move.getMoveInt()] = player;
         if(player == NauertOthelloProject.ME){
@@ -237,14 +173,14 @@ public class Board {
     }
     
     public void applyMoveAB(Move move, int player){
-        //System.out.println("C Move Chosen: " + moveToString(move));
+
         if(player == ME){
             System.out.println("C Applying My Move: ");
-            System.out.println("C " + myColor + " " + moveToString(move.getMoveInt(), player));
+            System.out.println("C " + myColor + " " + move.moveString);
         }
         else{
             System.out.println("C Applying Opponent Move: ");
-            System.out.println("C " + oppColor + " " + moveToString(move.getMoveInt(), player));
+            System.out.println("C " + oppColor + " " + move.moveString);
         }
         boardArray[move.getMoveInt()] = player;
         if(player == NauertOthelloProject.ME){
@@ -263,8 +199,10 @@ public class Board {
         for(int i = 0; i < 8; i++){
             direction = NauertOthelloProject.DIRECTIONS[i];
             newLocation = move + direction;
-            if(boardArray[newLocation] == player * -1){
-                flipOneDirection(direction, newLocation, player);
+            if(newLocation > 0){
+                if(boardArray[newLocation] == player * -1){
+                    flipOneDirection(direction, newLocation, player);
+                }
             }
         }
         
@@ -273,11 +211,13 @@ public class Board {
     private boolean flipOneDirection(int direction, int boardLocation, int player){
         boolean flipPiece = false;
         int newLocation = boardLocation + direction;
-        if(boardArray[newLocation] == player * -1){
-            flipPiece = flipOneDirection(direction, boardLocation + direction, player);
-        }
-        else if(boardArray[newLocation] == player){
-            flipPiece = true;
+        if(newLocation > 0){
+            if(boardArray[newLocation] == player * -1){
+                flipPiece = flipOneDirection(direction, boardLocation + direction, player);
+            }
+            else if(boardArray[newLocation] == player){
+                flipPiece = true;
+            }
         }
         if(flipPiece){
             boardArray[boardLocation] = player;
@@ -294,12 +234,6 @@ public class Board {
         return flipPiece;
     }
     
-    public boolean isGameOver(){
-        if(passCount >=2){
-            gameOver = true;
-        }
-        return gameOver;
-    }
     
     public void getScore(){
         
@@ -314,39 +248,49 @@ public class Board {
         
     }
     
+    public Move iterativeGetMoves(Board deepBoard, int ply, int player, double alpha, double beta, int increment){
+        Move bestMove = new Move();
+        
+        return bestMove;
+    }
+    
     public Move alphaBeta(Board currentboard, int ply, int player, double alpha, double beta, int maxDepth){
         
         if(ply >= maxDepth){
             System.out.println("C Max Depth Reached: " + ply);
             Move returnMove = new Move();
-            returnMove.setMoveValue(currentboard.evaluateBoard(player));
+            returnMove.setMoveValue(currentboard.countBlackPieces());
+            System.out.println("C Move Value: " + returnMove.getMoveValue());
             return returnMove;
         }
         
         else{
-            System.out.println("C Current Ply: " + ply);
+            //System.out.println("C Current Ply: " + ply);
             Move bestMove;
-            System.out.println("C Getting Moves for Player " + player);
+            //System.out.println("C Getting Moves for Player " + player);
             ArrayList<Move> currentMoves = currentboard.getMoves(player);
-            int i = 0;
+            if(currentMoves.isEmpty()){
+                currentMoves.add(new Move());
+            }
+            
+            System.out.println("C Ply: " + ply);
             System.out.println("C moves list for player " + player + ": ");
             printMoveList(currentMoves);
-
-            if(currentMoves.isEmpty()){
-                //as it is implemented right now, currentMoves can't be empty.
-                //instead, it might hold "passmove" which equals
-            }
             bestMove = currentMoves.get(0);
             for(Move move:currentMoves){
                 //System.out.println("Old Board Before Applying Move: ");
                 //System.out.println(currentboard.toString());
                 Board newBoard = new Board(currentboard);
+                System.out.println("C Ply: " + ply);
                 newBoard.applyMoveAB(move, player);
                 //System.out.println("New Board After Appling Move: " + move.getMoveString() + " for player " + player);
                 //System.out.println(newBoard.toString());
-                Move tempMove = alphaBeta(newBoard,ply+1,player*-1,beta*-1,alpha*-1,maxDepth);
+                Move tempMove = alphaBeta(newBoard,ply+1,player*-1,-beta,-alpha,maxDepth);
+                System.out.println("C Value: " + tempMove.getMoveValue());
                 if(tempMove.getMoveValue() > alpha){
                     bestMove = move;
+                    System.out.println("C New Best Move: " + bestMove.moveString +" for Player " + player+ " of Value: " + tempMove.getMoveValue());
+                    System.out.println("C Ply: " + ply);
                     alpha = tempMove.moveValue;
                     if(alpha > beta){
                         return bestMove;
@@ -378,7 +322,7 @@ public class Board {
     public double countBlackPieces(){
         int countPieces = 0;
         int boardLocation;
-        if(myColor == "BLACK"){
+        if(myColor == BLACK){
             for(int i = 1; i < 9 ; i++){
                 for(int j = 1; j < 9; j++){
                     boardLocation = i * 10 + j;
@@ -404,17 +348,6 @@ public class Board {
         return countPieces;
     }
     
-    public String moveToString(int move, int player){
-        String moveOutput;
-        int row;
-        String column;
-        row = move/10;
-        column = COLUMNS[(move-1)%10].toLowerCase();
-        
-        moveOutput = column + " " + row;
-        
-        return moveOutput;
-    }
     
     @Override
     public String toString(){

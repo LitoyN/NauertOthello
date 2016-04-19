@@ -5,6 +5,8 @@ package nauertothelloproject;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -23,17 +25,36 @@ public class NauertOthelloProject {
     public static final int NUMDIRECTIONS = 8;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
-    public static final int MAXDEPTH = 8;
+    public static final int MAXDEPTH = 4;
+    
+    public static double timeRemaining;
+    Timer timer;
+    public static boolean timeUp;
+    
+    static double timeAllocation[] = {0.015, 0.015, 0.015, 0.015, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025,
+                                    0.048,  0.048, 0.048, 0.048, 0.048, 0.048, 0.050, 0.051, 0.052, 0.053,
+                                    0.044,  0.045, 0.049, 0.049, 0.049, 0.051, 0.053, 0.055, 0.057, 0.059,
+                                    0.060, 0.060, 0.061, 0.062, 0.063, 0.064, 0.065, 0.065, 0.065, 0.065,
+                                    0.167, 0.168, 0.169, 0.169, 0.171, 0.172, 0.173, 0.175, 0.180, 0.180,
+                                    0.181, 0.187, 0.196, 0.199, 0.220, 0.220, 0.220, 0.220, 0.220, 0.220,
+                                    0.220, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250
+                                  };
     
     static Board gameBoard;
     static String myColor;
     static String oppColor;
     static String inputString;
     
+    public static int moveNumber;
+    
+    
     public static void main(String[] args) {
         Scanner keyboard = new Scanner(System.in);
         int currentPlayer = 1;
         Move thisMove;
+        moveNumber = 0;
+        timeRemaining = 600;
+        
         
         //Listen for color assignment and intialize board***********************
         boolean colorInit = false;
@@ -81,6 +102,7 @@ public class NauertOthelloProject {
                 if(myMoves.isEmpty()){
                     if(oppMoves.isEmpty()){
                         gameBoard.gameOver = true;
+                        System.out.println("C GAME OVER");
                         System.out.print(gameBoard.countBlackPieces());
                     }
                     else{
@@ -93,6 +115,9 @@ public class NauertOthelloProject {
                     thisMove = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH);
                     System.out.println("C New board before applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
                     System.out.println(gameBoard.toString());
+                    if(thisMove.moveValue == 0){
+                        System.out.print(myColor);
+                    }
                     gameBoard.applyMove(thisMove, ME);
                     System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
 
@@ -104,23 +129,15 @@ public class NauertOthelloProject {
                     System.out.println("Entered while loop");
                     inputString = getInput(keyboard);
                     System.out.println("InputString: " + inputString);
-                    if(inputString.startsWith(oppColor)){
+                    if(!inputString.startsWith("q")){
                         validInput = true;
                     }
                 }
                 //NEED TO HANDLE PASSES BETTER.
-                if(inputString.equalsIgnoreCase(PASS)){
-                    thisMove = new Move(PASS);
-                }
-                else{
-                    inputString = inputString.substring(2);
-                    System.out.println("Move substring: " + inputString);
-                    thisMove = new Move(inputString);
-                    System.out.println("Move string after converting to Move object: " + thisMove.moveString);
-                    gameBoard.applyMove(thisMove, OPPONENT);
-                    System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
-
-                }
+                thisMove = new Move(inputString);
+                System.out.println("Move string after converting to Move object: " + thisMove.moveString);
+                gameBoard.applyMove(thisMove, OPPONENT);
+                System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
             }
             currentPlayer = currentPlayer*-1;
             System.out.println(gameBoard.toString());
@@ -128,6 +145,28 @@ public class NauertOthelloProject {
         
 
        
+    }
+    
+    public Move getMyMove(){
+        moveNumber++;
+        timeUp = false;
+        timer = new Timer();
+        
+        int timeForMove = (int)(timeAllocation[moveNumber]*(double)timeRemaining);
+        
+        System.out.print("C Move Time: " + timeForMove);
+        timer.schedule(new InterruptTask(), timeForMove*1000);
+        
+        ArrayList<Move> myMoves = gameBoard.getMoves(ME);
+        gameBoard.applyMove((Move)myMoves.get(0), ME);
+        if (!timeUp){
+            timer.cancel();
+        }
+        timeRemaining -= timeForMove;  //update the time remaining 
+
+        System.out.print("C Remaining Time: " + timeRemaining);
+        Move selectedMove = (Move)(myMoves.get(0));
+        return selectedMove;
     }
     
     private static String getColor(Scanner input){
@@ -204,6 +243,14 @@ public class NauertOthelloProject {
 
         
         return moveString;
+    }
+    
+    class InterruptTask extends TimerTask {
+      public void run() {
+	  System.out.println("(C ****>timeup)");
+	  timeUp = true;
+          timer.cancel();
+      }
     }
     
 }

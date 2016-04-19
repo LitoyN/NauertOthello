@@ -50,7 +50,7 @@ public class Move {
     
     public Move(){
         moveInt = 0;
-        moveString = "no";
+        moveString = "";
         moveValue = 0;
     }
     
