@@ -25,7 +25,7 @@ public class NauertOthelloProject {
     public static final int NUMDIRECTIONS = 8;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
-    public static final int MAXDEPTH = 4;
+    public static final int MAXDEPTH = 8;
     
     public static double timeRemaining;
     Timer timer;

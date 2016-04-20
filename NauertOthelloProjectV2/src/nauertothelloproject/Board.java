@@ -88,7 +88,7 @@ public class Board {
         for(Move moveList1 : moveList) {
             System.out.println("C " + moveList1.moveString + " ");
         }
-        System.out.println();
+        System.out.println("C");
     }
     
     public ArrayList getMoves(int player){
@@ -259,48 +259,89 @@ public class Board {
         if(ply >= maxDepth){
             System.out.println("C Max Depth Reached: " + ply);
             Move returnMove = new Move();
-            returnMove.setMoveValue(currentboard.countBlackPieces());
-            System.out.println("C Move Value: " + returnMove.getMoveValue());
+            returnMove.setMoveValue(currentboard.evaluateBoard(ME));
+            System.out.println("C Move Value Being Returned: " + returnMove.getMoveValue());
             return returnMove;
         }
         
         else{
-            //System.out.println("C Current Ply: " + ply);
+
             Move bestMove;
-            //System.out.println("C Getting Moves for Player " + player);
+
             ArrayList<Move> currentMoves = currentboard.getMoves(player);
             if(currentMoves.isEmpty()){
                 currentMoves.add(new Move());
             }
-            
+            System.out.println("C");
             System.out.println("C Ply: " + ply);
             System.out.println("C moves list for player " + player + ": ");
             printMoveList(currentMoves);
-            bestMove = currentMoves.get(0);
+            bestMove = currentMoves.get(1);
+            bestMove.moveValue = -1;
             for(Move move:currentMoves){
-                //System.out.println("Old Board Before Applying Move: ");
-                //System.out.println(currentboard.toString());
+
                 Board newBoard = new Board(currentboard);
-                System.out.println("C Ply: " + ply);
                 newBoard.applyMoveAB(move, player);
-                //System.out.println("New Board After Appling Move: " + move.getMoveString() + " for player " + player);
-                //System.out.println(newBoard.toString());
-                Move tempMove = alphaBeta(newBoard,ply+1,player*-1,-beta,-alpha,maxDepth);
-                System.out.println("C Value: " + tempMove.getMoveValue());
-                if(tempMove.getMoveValue() > alpha){
+
+                Move tempMove = alphaBeta(newBoard,ply+1,player*-1,alpha,beta,maxDepth);
+                
+                //System.out.println("C Move: " + move.moveString);
+                //System.out.println("C Value: " + tempMove.getMoveValue());
+                if(player == ME && tempMove.getMoveValue() > alpha){
                     bestMove = move;
+                    bestMove.setMoveValue(tempMove.getMoveValue());
                     System.out.println("C New Best Move: " + bestMove.moveString +" for Player " + player+ " of Value: " + tempMove.getMoveValue());
                     System.out.println("C Ply: " + ply);
                     alpha = tempMove.moveValue;
-                    if(alpha > beta){
+                    System.out.println("C Alpha: " + alpha);
+                    System.out.println("C Beta: " + beta);
+                    System.out.println("C");
+                    if(alpha >= beta){
+                        System.out.println("C alpha > beta, returning Move: " + bestMove.moveString);
+                        return bestMove;
+                    }
+                }
+                else if(player == OPPONENT && tempMove.getMoveValue() < beta){
+                    //System.out.println("C value vs beta: " + tempMove.moveValue + " vs " + beta);
+                    bestMove = move;
+                    bestMove.setMoveValue(tempMove.getMoveValue());
+                    System.out.println("C New Best Move: " + bestMove.moveString +" for Player " + player+ " of Value: " + tempMove.getMoveValue());
+                    System.out.println("C Ply: " + ply);
+                    beta = tempMove.moveValue;
+                    System.out.println("C Alpha: " + alpha);
+                    System.out.println("C Beta: " + beta);
+                    System.out.println("C");
+                    if(alpha >= beta){
+                        System.out.println("C alpha > beta,  returning Move: " + bestMove.moveString);
                         return bestMove;
                     }
                 }
             }
+            System.out.println("C Final Move Returned: " + bestMove.moveString);
+            System.out.println("C Final Value: " + bestMove.moveValue);
+            System.out.println("C Alpha: " + alpha);
+            System.out.println("C Beta: " + beta);
             return bestMove;
         }
         
     }
+    
+    /**public double evaluateBoard(int player){
+        //********CHECK FOR END GAME*******************************************
+        //********IF WIN, MAKE VALUE VERY HIGH*********************************
+        //*********IF LOSS, MAKE VALUE LOW************************************
+        int countPieces = 0;
+        int boardLocation;
+        for(int i = 1; i < 9 ; i++){
+            for(int j = 1; j < 9; j++){
+                boardLocation = i * 10 + j;
+                if(boardArray[boardLocation] == player){
+                    countPieces++;
+                }
+            }
+        }
+        return countPieces;
+    }**/
     
     public double evaluateBoard(int player){
         //********CHECK FOR END GAME*******************************************
