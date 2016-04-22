@@ -405,7 +405,14 @@ public class Board {
             printMoveList(currentMoves);
             bestMove = currentMoves.get(0);
             movesList.add(bestMove);
-            bestMove.moveValue = evaluateBoard(ME, new Move());
+            Board defaultBoard = new Board(currentboard);
+            if(ply%2 == 0){
+                defaultBoard.applyMoveAB(bestMove,ME);
+            }
+            else{
+                defaultBoard.applyMoveAB(bestMove, OPPONENT);
+            }
+            bestMove.moveValue = defaultBoard.evaluateBoard(ME, new Move());
             for(Move move:currentMoves){
 
                 Board newBoard = new Board(currentboard);

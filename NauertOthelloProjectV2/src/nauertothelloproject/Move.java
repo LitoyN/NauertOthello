@@ -37,7 +37,7 @@ public class Move {
         }
         else{
             moveInt = moveint;
-            moveString = moveToString(moveint);
+            moveString = moveToString(moveint).toLowerCase();
             moveValue = 0;
         }
     }

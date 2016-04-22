@@ -14,8 +14,8 @@ import java.util.TimerTask;
  */
 public class NauertOthelloProject {
 
-    public static final String BLACK = "b";
-    public static final String WHITE = "w";
+    public static final String BLACK = "B";
+    public static final String WHITE = "W";
     public static final String PASS = "pass";
     public static final int EMPTY = 0;
     public static final int ME = 1;
@@ -142,17 +142,17 @@ public class NauertOthelloProject {
             else{
                 boolean validInput = false;
                 while(!validInput){
-                    System.out.println("Entered while loop");
+                    System.out.println("C Entered while loop");
                     inputString = getInput(keyboard);
-                    System.out.println("InputString: " + inputString);
+                    System.out.println("C InputString: " + inputString);
                     if(!inputString.startsWith("q")){
                         validInput = true;
                     }
                 }
                 //NEED TO HANDLE PASSES BETTER.
                 thisMove = new Move(inputString);
-                System.out.println("Move string after converting to Move object: " + thisMove.moveString);
-                gameBoard.applyMove(thisMove, OPPONENT);
+                System.out.println("C Move string after converting to Move object: " + thisMove.moveString);
+                gameBoard.applyMoveAB(thisMove, OPPONENT);
                 System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
             }
             
@@ -193,7 +193,7 @@ public class NauertOthelloProject {
         if(inputString.substring(0,1).equalsIgnoreCase("i") &&
                 inputString.length() >= 3){
             mycolor = inputString.substring(2,3);
-            switch(mycolor.toLowerCase()){
+            switch(mycolor.toUpperCase()){
                 case BLACK:
                     oppColor = WHITE;
                     break;
