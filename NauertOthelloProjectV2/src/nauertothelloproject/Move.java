@@ -32,7 +32,7 @@ public class Move {
     public Move(int moveint){
         if(moveint <= 0){
             moveInt = moveint;
-            moveString = "PASS";
+            moveString = "   ";
             moveValue = 0;
         }
         else{
@@ -50,7 +50,7 @@ public class Move {
     
     public Move(){
         moveInt = 0;
-        moveString = "";
+        moveString = "  ";
         moveValue = 0;
     }
     

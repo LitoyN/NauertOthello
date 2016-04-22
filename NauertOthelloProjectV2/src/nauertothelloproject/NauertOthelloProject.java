@@ -25,7 +25,8 @@ public class NauertOthelloProject {
     public static final int NUMDIRECTIONS = 8;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
     
-    public static final int MAXDEPTH = 8;
+    public static final int MAXDEPTH = 4;
+    public static final int ITERATIVEDEPTH = 10;
     
     public static double timeRemaining;
     Timer timer;
@@ -88,12 +89,19 @@ public class NauertOthelloProject {
         //print initial board
         System.out.print(gameBoard.toString());
         
+        
+        long startTime;
+        long endTime;
+        long totalTime = 0;
         //while each player still has moves, alternate turns********************
         while(!gameBoard.gameOver){
             boolean validMoveTaken;
+            startTime = System.nanoTime();
+            
             System.out.println("C Starting Player " + currentPlayer + "'s turn");
             System.out.println("C ");
             if(currentPlayer == ME){
+                System.nanoTime();
                 System.out.println("C Compiling moves lists for both players to check end game");
                 ArrayList<Move> myMoves = gameBoard.getMoves(ME);
                 ArrayList<Move> oppMoves = gameBoard.getMoves(OPPONENT);
@@ -103,7 +111,8 @@ public class NauertOthelloProject {
                     if(oppMoves.isEmpty()){
                         gameBoard.gameOver = true;
                         System.out.println("C GAME OVER");
-                        System.out.print(gameBoard.countBlackPieces());
+                        System.out.println(gameBoard.countBlackPieces());
+                        System.out.println("C Total Time For My Turns: " + (totalTime*.000000001)/60);
                     }
                     else{
                         System.out.print(myColor);
@@ -112,7 +121,12 @@ public class NauertOthelloProject {
                 else{
                     double alpha = Double.MIN_VALUE;
                     double beta = Double.MAX_VALUE;
-                    thisMove = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH);
+                    ArrayList<Move> moveChain = new ArrayList<>();
+                    //DeepObjectAndList thisDeepAndList = gameBoard.iterativeGetMoves(gameBoard, 0, ME, alpha, beta, ITERATIVEDEPTH, new Move());
+                    //thisMove = thisDeepAndList.bestDeepObject.deepMoveList.get(0);
+                    moveChain = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH, new Move());
+                    thisMove = moveChain.get(moveChain.size()-1);
+                    //thisMove = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH,0);
                     System.out.println("C New board before applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
                     System.out.println(gameBoard.toString());
                     if(thisMove.moveValue == 0){
@@ -122,6 +136,8 @@ public class NauertOthelloProject {
                     System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
 
                 }
+                endTime = System.nanoTime();
+                totalTime = totalTime + (endTime-startTime);
             }
             else{
                 boolean validInput = false;
@@ -139,6 +155,7 @@ public class NauertOthelloProject {
                 gameBoard.applyMove(thisMove, OPPONENT);
                 System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
             }
+            
             currentPlayer = currentPlayer*-1;
             System.out.println(gameBoard.toString());
         }
