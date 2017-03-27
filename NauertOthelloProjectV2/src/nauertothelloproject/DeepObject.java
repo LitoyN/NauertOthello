@@ -29,6 +29,11 @@ public class DeepObject {
         this(null,null);
     }
     
+    DeepObject(DeepObject toCopy){
+        deepMoveList = toCopy.deepMoveList;
+        deepBoard = toCopy.deepBoard;
+    }
+    
     public void setMoveList(ArrayList<Move> newList){
         deepMoveList = newList;
     }

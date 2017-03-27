@@ -24,13 +24,18 @@ public class NauertOthelloProject {
     public static final int[] DIRECTIONS = {-11,-10,-9,-1,1,9,10,11};
     public static final int NUMDIRECTIONS = 8;
     public static final String[] COLUMNS = {"A","B","C","D","E","F","G","H"};
+    public static final double alpha = Double.MIN_VALUE;
+    public static final double beta = Double.MAX_VALUE;
     
-    public static final int MAXDEPTH = 4;
-    public static final int ITERATIVEDEPTH = 10;
+    public static final int MAXDEPTH = 2;
+    public static final int ITERATIVEDEPTH = 2;
     
-    public static double timeRemaining;
-    Timer timer;
+    public static double timeRemaining = 600;
+    public static Timer timer;
     public static boolean timeUp;
+    
+    public static MoveNode currentNode;
+    public static Move opponentLast;
     
     static double timeAllocation[] = {0.015, 0.015, 0.015, 0.015, 0.025, 0.025, 0.025, 0.025, 0.025, 0.025,
                                     0.048,  0.048, 0.048, 0.048, 0.048, 0.048, 0.050, 0.051, 0.052, 0.053,
@@ -54,9 +59,8 @@ public class NauertOthelloProject {
         int currentPlayer = 1;
         Move thisMove;
         moveNumber = 0;
-        timeRemaining = 600;
-        
-        
+        System.out.println("C Move Number: " + moveNumber);
+
         //Listen for color assignment and intialize board***********************
         boolean colorInit = false;
         while(!colorInit){
@@ -84,24 +88,22 @@ public class NauertOthelloProject {
         else{
             currentPlayer = OPPONENT;
         }
+        
+        MoveNode rootNode = new MoveNode(gameBoard,currentPlayer);
+        currentNode = rootNode;
         //board initialized*****************************************************
         
         //print initial board
         System.out.print(gameBoard.toString());
-        
-        
-        long startTime;
-        long endTime;
-        long totalTime = 0;
+
         //while each player still has moves, alternate turns********************
         while(!gameBoard.gameOver){
+            timeUp = false;
             boolean validMoveTaken;
-            startTime = System.nanoTime();
             
             System.out.println("C Starting Player " + currentPlayer + "'s turn");
             System.out.println("C ");
             if(currentPlayer == ME){
-                System.nanoTime();
                 System.out.println("C Compiling moves lists for both players to check end game");
                 ArrayList<Move> myMoves = gameBoard.getMoves(ME);
                 ArrayList<Move> oppMoves = gameBoard.getMoves(OPPONENT);
@@ -112,32 +114,21 @@ public class NauertOthelloProject {
                         gameBoard.gameOver = true;
                         System.out.println("C GAME OVER");
                         System.out.println(gameBoard.countBlackPieces());
-                        System.out.println("C Total Time For My Turns: " + (totalTime*.000000001)/60);
                     }
                     else{
                         System.out.print(myColor);
                     }
                 }
+                
                 else{
-                    double alpha = Double.MIN_VALUE;
-                    double beta = Double.MAX_VALUE;
-                    ArrayList<Move> moveChain = new ArrayList<>();
-                    //DeepObjectAndList thisDeepAndList = gameBoard.iterativeGetMoves(gameBoard, 0, ME, alpha, beta, ITERATIVEDEPTH, new Move());
-                    //thisMove = thisDeepAndList.bestDeepObject.deepMoveList.get(0);
-                    moveChain = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH, new Move());
-                    thisMove = moveChain.get(moveChain.size()-1);
-                    //thisMove = gameBoard.alphaBeta(gameBoard, 0, ME, alpha, beta, MAXDEPTH,0);
-                    System.out.println("C New board before applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
-                    System.out.println(gameBoard.toString());
-                    if(thisMove.moveValue == 0){
-                        System.out.print(myColor);
+                    currentNode.expand(ME);
+                    myMoves = gameBoard.alphaBeta(currentNode, MAXDEPTH, new Move());
+                    System.out.println("C Heres my moves");
+                    for(Move moves:myMoves){
+                        System.out.println("C " + moves.moveString);
                     }
-                    gameBoard.applyMove(thisMove, ME);
-                    System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
-
                 }
-                endTime = System.nanoTime();
-                totalTime = totalTime + (endTime-startTime);
+                
             }
             else{
                 boolean validInput = false;
@@ -149,8 +140,8 @@ public class NauertOthelloProject {
                         validInput = true;
                     }
                 }
-                //NEED TO HANDLE PASSES BETTER.
                 thisMove = new Move(inputString);
+                opponentLast = thisMove;
                 System.out.println("C Move string after converting to Move object: " + thisMove.moveString);
                 gameBoard.applyMoveAB(thisMove, OPPONENT);
                 System.out.println("C New board after applying final chosen move: " + thisMove.getMoveString() + " for player " + currentPlayer);
@@ -158,33 +149,13 @@ public class NauertOthelloProject {
             
             currentPlayer = currentPlayer*-1;
             System.out.println(gameBoard.toString());
+            moveNumber++;
         }
         
 
        
     }
     
-    public Move getMyMove(){
-        moveNumber++;
-        timeUp = false;
-        timer = new Timer();
-        
-        int timeForMove = (int)(timeAllocation[moveNumber]*(double)timeRemaining);
-        
-        System.out.print("C Move Time: " + timeForMove);
-        timer.schedule(new InterruptTask(), timeForMove*1000);
-        
-        ArrayList<Move> myMoves = gameBoard.getMoves(ME);
-        gameBoard.applyMove((Move)myMoves.get(0), ME);
-        if (!timeUp){
-            timer.cancel();
-        }
-        timeRemaining -= timeForMove;  //update the time remaining 
-
-        System.out.print("C Remaining Time: " + timeRemaining);
-        Move selectedMove = (Move)(myMoves.get(0));
-        return selectedMove;
-    }
     
     private static String getColor(Scanner input){
 
@@ -216,28 +187,6 @@ public class NauertOthelloProject {
         return mycolor;
     }
     
-    private static int stringToMove(String inputString){
-        int moveInt = 0;
-        String column = inputString.substring(0,1);
-        int columnInt = 0;
-        boolean foundCol = false;
-        int i = 0;
-        while(!foundCol){
-            if(COLUMNS[i].equalsIgnoreCase(column)){
-                //System.out.println("C COLUMN: " + COLUMNS[i]);
-                foundCol = true;
-                columnInt = i +1;
-            }
-            i++;
-        }
-        int row = Integer.parseInt(inputString.substring(2,3));
-        //System.out.println("C ROW: " + row);
-        
-        moveInt = 10 * row;
-        moveInt = moveInt + columnInt;
-        //System.out.println("C move in int form: " + moveInt);
-        return moveInt;
-    }
     
     private static String getInput(Scanner input){
         String moveString = input.nextLine();
@@ -262,9 +211,9 @@ public class NauertOthelloProject {
         return moveString;
     }
     
-    class InterruptTask extends TimerTask {
+    static class InterruptTask extends TimerTask {
       public void run() {
-	  System.out.println("(C ****>timeup)");
+	  System.out.println("C ****>timeup");
 	  timeUp = true;
           timer.cancel();
       }
